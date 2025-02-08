@@ -24,31 +24,38 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
-app.get("/api/:date", function (req, res) {
-  const inputDate = req.params.date         
+app.get("/api/:date?", function (req, res) {
+  const inputDate = req.params.date           
   const isValidDate = (Date.parse(inputDate) > 1) ? true : false;
   const isValidUnix = isNaN(inputDate) == false
 
-  if(isValidDate && isValidUnix == false){
-    console.log('valid date')    
+  if(typeof(inputDate) == 'undefined'){
+    console.log('missing path param :date')    
+    const currentTime = new Date()    
+    const currentUnix = currentTime.getTime()  
+    res.json({"unix":currentUnix,"utc":currentTime})
+  }
+  else if(isValidDate && isValidUnix == false){
+    // console.log('valid date')    
     const utcDate = new Date(inputDate).toUTCString()        
     const unixDate = new Date(inputDate).getTime()
     console.log('unix: ', typeof unixDate)
     res.json({"unix":unixDate,"utc":utcDate})
   }
   else if(isValidUnix && isValidDate == false){
+    // console.log('unix date')    
     const unixDate = parseInt(inputDate)
     const utcDate = new Date(parseInt(inputDate)).toUTCString()
     res.json({"unix":unixDate, "utc":utcDate})
   }
   else if(isValidDate == false && isValidUnix == false){
-    console.log('invalid date')    
+    // console.log('invalid input')         
     res.status(400).json({error: "Invalid Date"})
   }
   else{
     console.log('default')    
     const currentTime = new Date()    
-    const currentUnix = Math.floor(currentTime.getTime() / 1000);    
+    const currentUnix = currentTime.getTime()
     res.json({"unix":currentUnix,"utc":currentTime})
   }
 
